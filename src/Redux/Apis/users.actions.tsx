@@ -1,117 +1,90 @@
 import { axiosService } from "../helpers/axios";
 
-// export const ApproveUser = async (id: string): Promise<any> => {
-//     try {
-//         const response = await axiosService.post(`user/auth/approveuser?id='${id}'`);
-//         return response;
-//     } catch (error: any) {
-//         console.error(error);
-//         throw new Error();
-//     }
-// };
+export interface LoginPayload {
+  username: string;
+  password: string;
+}
 
-// export const RevokeUser = async (id: string): Promise<any> => {
-//     try {
-//         const response = await axiosService.post(`user/auth/approveuser?id=${id}`);
-//         return response;
-//     } catch (error: any) {
-//         console.error(error);
-//         throw new Error();
-//     }
-// };
+export interface LoginResponse {
+  message: string;
+  token: string;
+}
 
-export const RegisterUser = async (payload: any): Promise<any> => {
-  try {
-    const response = await axiosService.post("/user/auth/signup", payload);
-    localStorage.setItem("adminToken", response.data.Data);
-    return response;
-  } catch (error: any) {
-    console.log(error);
-    throw new Error(error.message);
-  }
-};
-//
+export interface User {
+  ID: number;
+  CreatedAt: string;
+  UpdatedAt: string;
+  DeletedAt: string | null;
+  userid: string;
+  firstname: string;
+  middlename: string;
+  lastname: string;
+  email: string;
+  token: string;
+  phone: string;
+  password: string;
+  userimage: string;
+  location: string;
+  noofproducts: number;
+  packagetype: string;
+  activeads: number;
+  inactiveads: number;
+  deletedads: number;
+  usertype: string;
+  isapproved: boolean;
+  totallikes: number;
+  totalviews: number;
+  datejoined: string;
+  lastlogin: string;
+  lastinteraction: string;
+  notifications: number;
+}
 
-export const LoginUser = async (payload: any): Promise<any> => {
-  try {
-    const response = await axiosService.post("/user/auth/signin", payload);
-    localStorage.setItem("adminToken", response.data.Data);
-    return response;
-  } catch (error: any) {
-    console.log(error, "a terrible error occurred");
-    throw new Error(error.message);
-  }
-};
-
-export const currentUser = async () => {
-  try {
-    const response = await axiosService.get("/user/auth/getuser");
-    return response;
-  } catch (error: any) {
-    console.log(error, "someError");
-    throw new Error(error.message);
-  }
-};
-
-export const loggedInUser = async () => {
-  const response = await axiosService.get("/user/auth/getuser");
-  return response;
-};
+export interface FetchUsersResponse {
+  users: User[];
+}
 
 export const RegistrationOfUser = async (formdata: any) => {
   const response = await axiosService.post("/admin/register", formdata);
-  return response;
+  return response.data;
 };
 
-export const LogginOfUser = async (formdata: any) => {
-  const response = await axiosService.post("/admin/auth/login", formdata);
-  return response;
+export const LogginOfUser = async (
+  formdata: LoginPayload
+): Promise<LoginResponse> => {
+  const response = await axiosService.post("/admin/signin", formdata);
+  return response.data;
 };
 
-export const GetUserById = async (id: any) => {
+export const getUsers = async (): Promise<FetchUsersResponse> => {
+  const response = await axiosService.get("/admin/fetchusers");
+  return response.data;
+};
+
+export const GetUserById = async (id: string) => {
   const response = await axiosService.get(`/user/auth/fetchuser?id=${id}`);
-  return response;
+  return response.data;
 };
 
-export const UpdateOfUser = async (userid: any, formdata: any) => {
+export const UpdateOfUser = async (userid: string, formdata: any) => {
   const response = await axiosService.post(
     `/user/auth/updateuser?userid=${userid}`,
     formdata
   );
-  return response;
+  return response.data;
 };
 
-export const ApproveUser = async (id: string): Promise<any> => {
-  try {
-    const response = await axiosService.post(`/admin/approveuser?id=${id}`);
-    return response;
-  } catch (error: any) {
-    console.error(error);
-    throw new Error();
-  }
+export const loggedInUser = async () => {
+  const response = await axiosService.get("/user/auth/getuser");
+  return response.data;
 };
 
-export const RevokeUser = async (id: string): Promise<any> => {
-  try {
-    const response = await axiosService.post(`/admin/revokeuser?id=${id}`);
-    return response;
-  } catch (error: any) {
-    console.error(error);
-    throw new Error();
-  }
+export const ApproveUser = async (id: string) => {
+  const response = await axiosService.post(`/admin/approveuser?id=${id}`);
+  return response.data;
 };
 
-export const getUsers = async () => {
-  const response = await axiosService.get(`/user/auth/fetchsellers`);
-  return response;
-};
-
-export const getUser = async (id: any) => {
-  try {
-    const response = await axiosService.get(`/user/auth/fetchuser?id=${id}`);
-    return response;
-  } catch (error: any) {
-    console.log(error);
-    throw new Error(error.message);
-  }
+export const RevokeUser = async (id: string) => {
+  const response = await axiosService.post(`/admin/revokeuser?id=${id}`);
+  return response.data;
 };

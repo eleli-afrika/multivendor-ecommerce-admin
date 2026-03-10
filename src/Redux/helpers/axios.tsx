@@ -1,29 +1,15 @@
 import axios from "axios";
 
 export const axiosService = axios.create({
-  baseURL: import.meta.env.API_URL || "http://localhost:8000",
+  baseURL: import.meta.env.VITE_API_URL,
 });
 
-// Add a response interceptor to handle errors
-axiosService.interceptors.response.use(
-  (response) => {
-    return response;
-  },
-  (error) => {
-    if (error.response && error.response.status === 400) {
-      // Log the error response body
-      console.error("Error Response Body:", error.response.data);
-    }
-    return Promise.reject(error);
-  }
-);
+axiosService.interceptors.request.use((config) => {
+  const token = localStorage.getItem("adminToken");
 
-// Add a request interceptor
-axiosService.interceptors.request.use(async (req) => {
-  let token = localStorage.getItem("adminToken");
   if (token) {
-    req.headers["x-access-token"] = token;
+    config.headers.Authorization = token;
   }
 
-  return req;
+  return config;
 });
