@@ -45,19 +45,19 @@ export interface FetchUsersResponse {
 }
 
 export const RegistrationOfUser = async (formdata: any) => {
-  const response = await axiosService.post("/admin/register", formdata);
+  const response = await axiosService.post("/auth/signup", formdata);
   return response.data;
 };
 
 export const LogginOfUser = async (
   formdata: LoginPayload
 ): Promise<LoginResponse> => {
-  const response = await axiosService.post("/admin/signin", formdata);
+  const response = await axiosService.post("/auth/signin", formdata);
   return response.data;
 };
 
 export const getUsers = async (): Promise<FetchUsersResponse> => {
-  const response = await axiosService.get("/admin/fetchusers");
+  const response = await axiosService.get("/panel/fetchusers");
   return response.data;
 };
 
@@ -80,11 +80,11 @@ export const loggedInUser = async () => {
 };
 
 export const ApproveUser = async (id: string) => {
-  const response = await axiosService.post(`/admin/approveuser?id=${id}`);
+  const response = await axiosService.post(`/panel/approveuser?id=${id}`);
   return response.data;
 };
 
 export const RevokeUser = async (id: string) => {
-  const response = await axiosService.post(`/admin/revokeuser?id=${id}`);
+  const response = await axiosService.post(`/panel/revokeuser?id=${id}`);
   return response.data;
 };

@@ -156,7 +156,7 @@ const Footer = () => {
 
                 <div style={{ borderTop: ' solid 2px #DC5F00' }} className="w-full">
                     <p className="text-center text-white py-2 mt-2">
-                        © ELELI 2023 || All Rights Reserved
+                        © ELELI 2026 || All Rights Reserved
                     </p>
                 </div>
             </div>
