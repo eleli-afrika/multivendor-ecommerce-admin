@@ -1,27 +1,60 @@
-# React + TypeScript + Vite
+name: deploy ecommerce_admin
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+on:
+  push:
+    branches: [main]
+    
+env:
+  IMAGE_NAME: ${{ secrets.DOCR_REGISTRY }}/ecommerce_admin
 
-Currently, two official plugins are available:
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+jobs:
+  create-deployment:
+    name: build and push image
+    runs-on: ubuntu-latest
+    outputs:
+      image_tag: ${{ steps.image_meta.outputs.tag }}
 
-## Expanding the ESLint configuration
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+      - name: resolve image tag
+        id: image_meta
+        run: |
+          TAG=$(git describe --tags --abbrev=0 2>/dev/null || true)
+          if [ -z "$TAG" ]; then
+            TAG="main-${GITHUB_SHA::7}"
+          fi
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
 
-- Configure the top-level `parserOptions` property like this:
+      - name: Load env file from secret
+        run: |
+          printf "%s" "${{ secrets.MAIN_ENV_FILE }}" > .env
+          sed -i 's/\r$//' .env
 
-```js
-   parserOptions: {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
-    project: ['./tsconfig.json', './tsconfig.node.json'],
-    tsconfigRootDir: __dirname,
-   },
-```
+          # login first 
+      - name: login to container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ secrets.DOCR_REGISTRY }}
+          username: ${{ secrets.DOCR_USERNAME }}
+          password: ${{ secrets.DOCR_TOKEN }}    
 
-- Replace `plugin:@typescript-eslint/recommended` to `plugin:@typescript-eslint/recommended-type-checked` or `plugin:@typescript-eslint/strict-type-checked`
-- Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list
+      - name: build image
+        env:
+          DOCKER_BUILDKIT: 1
+        run: |
+          echo '${{ secrets.MAIN_ENV_FILE }}' > .env
+          docker build \
+            # --secret id=MAIN_ENV_FILE,src=.env \
+            --tag "${IMAGE_NAME}:${{ steps.image_meta.outputs.tag }}" \
+            .
+
+    
+      - name: push image
+        run: |
+          docker push "${IMAGE_NAME}:${{ steps.image_meta.outputs.tag }}"
+
