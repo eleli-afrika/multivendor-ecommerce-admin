@@ -33,7 +33,7 @@ const LoginForm: React.FC = () => {
       localStorage.setItem(
         "admin",
         JSON.stringify({
-          adminname: formData.username,
+          adminname: formData.email,
         })
       );
 
