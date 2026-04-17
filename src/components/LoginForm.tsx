@@ -29,6 +29,14 @@ const LoginForm: React.FC = () => {
     const resultAction = await dispatch(LoggingUser(formData));
 
     if (LoggingUser.fulfilled.match(resultAction) && resultAction.payload.token) {
+      localStorage.setItem("adminToken", resultAction.payload.token);
+      localStorage.setItem(
+        "admin",
+        JSON.stringify({
+          adminname: formData.username,
+        })
+      );
+
       navigate("/");
     }
   };

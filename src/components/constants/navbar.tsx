@@ -1,216 +1,273 @@
-import React, { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Links } from '../../Data/links';
-import close from '../../assets/close.png';
-import menu from '../../assets/menu.png';
-import logo from '../../assets/logo.png';
-import { IconButton, MenuItem, Typography, FormControl, Select, InputBase } from '@mui/material';
-import { MessageRounded, NotificationsActive } from '@mui/icons-material';
-import { adminProps } from '../../interface/common';
+import React, { useEffect, useMemo, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Links } from "../../Data/links";
+import close from "../../assets/close.png";
+import menu from "../../assets/menu.png";
+import logo from "../../assets/logo.png";
+import {
+    IconButton,
+    Menu,
+    MenuItem,
+    Typography,
+} from "@mui/material";
+import {
+    MessageRounded,
+    NotificationsActive,
+    KeyboardArrowDown,
+} from "@mui/icons-material";
+import { adminProps } from "../../interface/common";
 
-type LoginFormProps = {
-    SetShowLogin: React.Dispatch<React.SetStateAction<boolean>>;
-    SetShowAdsForm: React.Dispatch<React.SetStateAction<boolean>>;
-};
-
-const Navbar: React.FC<LoginFormProps> = () => {
-    const [active, setActive] = useState('');
+const Navbar: React.FC = () => {
     const [toggle, setToggle] = useState(false);
     const [scrolled, setScrolled] = useState(false);
-    const navigate = useNavigate();
     const [user, setUser] = useState<adminProps | null>(null);
-    // console.log(user);
+    const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
-    const adminDataString = localStorage.getItem('admin');
+    const navigate = useNavigate();
+    const location = useLocation();
+
+    const openMenu = Boolean(anchorEl);
+
+    const activePath = useMemo(() => location.pathname, [location.pathname]);
+
+
+
+    const loadAdminFromStorage = () => {
+        const storedAdmin = localStorage.getItem("admin");
+        const storedToken = localStorage.getItem("adminToken");
+
+        if (storedAdmin && storedToken) {
+            try {
+                setUser(JSON.parse(storedAdmin));
+            } catch (error) {
+                console.error("Failed to parse admin from localStorage:", error);
+                setUser(null);
+            }
+        } else {
+            setUser(null);
+        }
+    };
 
     useEffect(() => {
-        if (adminDataString !== null) {
-            setUser(JSON.parse(adminDataString));
-        } else {
-            console.error('Admin data not found in localStorage');
-        }
-    }, [user, adminDataString]);
+        loadAdminFromStorage();
+    }, [location.pathname]);
+
+    useEffect(() => {
+        const handleStorageChange = () => {
+            loadAdminFromStorage();
+        };
+
+        window.addEventListener("storage", handleStorageChange);
+        return () => window.removeEventListener("storage", handleStorageChange);
+    }, []);
 
     useEffect(() => {
         const handleScroll = () => {
-            const scrollTop = window.scrollY;
-            if (scrollTop > 100) {
-                setScrolled(true);
-            } else {
-                setScrolled(false);
-            }
+            setScrolled(window.scrollY > 40);
         };
 
-        window.addEventListener('scroll', handleScroll);
-
-        return () => window.removeEventListener('scroll', handleScroll);
+        window.addEventListener("scroll", handleScroll);
+        return () => window.removeEventListener("scroll", handleScroll);
     }, []);
+
+    const handleLogout = () => {
+        setUser(null);
+        localStorage.removeItem("adminToken");
+        localStorage.removeItem("admin");
+        setAnchorEl(null);
+        setToggle(false);
+        navigate("/login");
+    };
+
+    const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const handleCloseUserMenu = () => {
+        setAnchorEl(null);
+    };
 
     return (
         <nav
-            className={`$
-       w-full px-5 flex items-center fixed  shadow-custom top-0 z-20 ${
-           scrolled ? 'bg-white' : 'bg-white'
-       }`}
-            style={{ marginBottom: '2px' }}
+            className={`fixed top-0 z-20 w-full px-5 transition-all duration-300 ${scrolled ? "bg-white shadow-custom" : "bg-white shadow-sm"
+                }`}
         >
-            <div className="w-full flex justify-between items-center max-w-7xl mx-auto">
+            <div className="mx-auto flex w-full max-w-7xl items-center justify-between py-3">
                 <Link
                     to="/"
                     className="flex items-center gap-2"
-                    onClick={() => {
-                        setActive('');
-                        window.scrollTo(0, 0);
-                    }}
+                    onClick={() => window.scrollTo(0, 0)}
                 >
-                    <img src={logo} alt="logo" className=" logo object-contain" />
+                    <img src={logo} alt="logo" className="logo object-contain" />
                 </Link>
 
-                <ul className="list-none hidden sm:flex flex-row gap-10">
-                    <div>
-                        {/* <button
-                            className="bg-primary-orange text-black  p-1  capitalize rounded px-4 hover:bg-secondary-orange} text-white"
-                            // onClick={() => SetShowAdsForm(true)}
-                        >
-                            sell
-                        </button> */}
-                    </div>
-                    {Links.map((nav) => (
-                        <li
-                            key={nav.name}
-                            className={`${
-                                active === nav.name ? 'text-black' : 'text-black'
-                            } capitalize hover:text-primary-orange text-[18px] font-medium cursor-pointer`}
-                            onClick={() => setActive(nav.name)}
-                        >
-                            <Link to={nav.url}>{nav.name}</Link>
-                        </li>
-                    ))}
+                <div className="hidden items-center gap-8 sm:flex">
+                    <ul className="flex list-none flex-row gap-8">
+                        {Links.map((nav) => {
+                            const isActive = activePath === nav.url;
+
+                            return (
+                                <li key={nav.name}>
+                                    <Link
+                                        to={nav.url}
+                                        className={`text-[18px] font-medium capitalize transition ${isActive
+                                            ? "text-primary-orange"
+                                            : "text-black hover:text-primary-orange"
+                                            }`}
+                                    >
+                                        {nav.name}
+                                    </Link>
+                                </li>
+                            );
+                        })}
+                    </ul>
+
                     {user ? (
-                        <ul className="font-medium flex flex-col p-4 md:p-0 mt-4   md:flex-row md:space-x-8 md:mt-0 md:border-0 ">
-                            <li>
-                                <Link
-                                    to="#"
-                                    className="block py-2 pl-3 pr-4 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"
-                                >
-                                    <IconButton
-                                        style={{
-                                            color: '#DC5F00',
-                                            backgroundColor: '#eee',
-                                            cursor: 'pointer',
-                                        }}
-                                        onClick={() => navigate('/messages')}
-                                    >
-                                        <MessageRounded />
-                                    </IconButton>
-                                </Link>
-                            </li>
-                            <li>
-                                <Link
-                                    to="#"
-                                    className="block py-2 pl-3 pr-4 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"
-                                >
-                                    <IconButton
-                                        style={{
-                                            color: '#DC5F00',
-                                            backgroundColor: '#eee',
-                                            cursor: 'pointer',
-                                        }}
-                                        onClick={() => navigate('/notifications')}
-                                    >
-                                        <NotificationsActive />
-                                    </IconButton>
-                                </Link>
-                            </li>
-
-                            <FormControl>
-                                <Select
-                                    value={`${user.adminname}`}
-                                    sx={{
-                                        backgroundColor: '#eee',
-                                        width: '150px',
-                                        borderRadius: '0.25rem',
-                                        p: '0.25rem 1rem',
-                                        '& .MuiSvgIcon-root': {
-                                            pr: '0.25rem',
-                                            width: '3rem',
-                                        },
-                                        '& .MuiSelect-select:focus': {
-                                            backgroundColor: '#eee',
-                                        },
-                                    }}
-                                    input={<InputBase />}
-                                >
-                                    <MenuItem
-                                        value={`${user.adminname}`}
-                                        onClick={() => {
-                                            navigate('/');
-                                        }}
-                                    >
-                                        <Typography>{`${user.adminname}`}</Typography>
-                                    </MenuItem>
-                                    <MenuItem
-                                        onClick={() => {
-                                            setUser(null);
-                                            localStorage.removeItem('adminToken');
-                                            localStorage.removeItem('admin');
-                                            navigate('/login');
-                                        }}
-                                    >
-                                        Logout
-                                    </MenuItem>
-                                </Select>
-                            </FormControl>
-                        </ul>
-                    ) : (
-                        <div>
-                            <button
-                                className="bg-primary-orange text-white p-1 rounded px-4 hover:bg-secondary-orange}"
-                                onClick={() => navigate('/login')}
+                        <div className="flex items-center gap-3">
+                            <IconButton
+                                sx={{
+                                    color: "#DC5F00",
+                                    backgroundColor: "#eee",
+                                    "&:hover": { backgroundColor: "#e5e5e5" },
+                                }}
+                                onClick={() => navigate("/messages")}
                             >
-                                Signin
-                            </button>
-                        </div>
-                    )}
-                </ul>
+                                <MessageRounded />
+                            </IconButton>
 
-                <div className="sm:hidden flex flex-1 justify-end items-center">
+                            <IconButton
+                                sx={{
+                                    color: "#DC5F00",
+                                    backgroundColor: "#eee",
+                                    "&:hover": { backgroundColor: "#e5e5e5" },
+                                }}
+                                onClick={() => navigate("/notifications")}
+                            >
+                                <NotificationsActive />
+                            </IconButton>
+
+                            <button
+                                onClick={handleOpenUserMenu}
+                                className="flex items-center gap-2 rounded-md bg-[#eee] px-4 py-2 text-sm font-medium text-black transition hover:bg-[#e5e5e5]"
+                            >
+                                <span>{user.adminname}</span>
+                                <KeyboardArrowDown fontSize="small" />
+                            </button>
+
+                            <Menu
+                                anchorEl={anchorEl}
+                                open={openMenu}
+                                onClose={handleCloseUserMenu}
+                                anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+                                transformOrigin={{ vertical: "top", horizontal: "right" }}
+                            >
+                                <MenuItem
+                                    onClick={() => {
+                                        handleCloseUserMenu();
+                                        navigate("/");
+                                    }}
+                                >
+                                    <Typography>{user.adminname}</Typography>
+                                </MenuItem>
+
+                                <MenuItem onClick={handleLogout}>Logout</MenuItem>
+                            </Menu>
+                        </div>
+                    ) : (
+                        <button
+                            className="rounded bg-primary-orange px-4 py-2 text-white transition hover:bg-secondary-orange"
+                            onClick={() => navigate("/login")}
+                        >
+                            Sign in
+                        </button>
+                    )}
+                </div>
+
+                <div className="flex flex-1 justify-end items-center sm:hidden">
                     <IconButton
-                        style={{
-                            color: '#991b1b',
-                            backgroundColor: '#eee',
-                            cursor: 'pointer',
+                        sx={{
+                            color: "#991b1b",
+                            backgroundColor: "#eee",
+                            "&:hover": { backgroundColor: "#e5e5e5" },
                         }}
+                        onClick={() => setToggle((prev) => !prev)}
                     >
                         <img
                             src={toggle ? close : menu}
                             alt="menu"
-                            className="w-[24px] h-[24px] object-contain"
-                            onClick={() => setToggle(!toggle)}
+                            className="h-6 w-6 object-contain"
                         />
                     </IconButton>
 
                     <div
-                        className={`${
-                            !toggle ? 'hidden' : 'flex'
-                        } p-6 black-gradient absolute top-20 right-0 mx-4 my-2 min-w-[300px] z-10 rounded-xl`}
+                        className={`absolute right-0 top-20 z-10 mx-4 my-2 min-w-[280px] rounded-xl bg-white p-6 shadow-xl ${!toggle ? "hidden" : "flex"
+                            }`}
                     >
-                        <ul className="list-none flex justify-end items-start flex-1 flex-col gap-4">
-                            {Links.map((nav) => (
-                                <li
-                                    key={nav.name}
-                                    className={`font-poppins font-medium cursor-pointer text-[16px] ${
-                                        active === nav.name ? 'text-white' : 'text-secondary'
-                                    }`}
+                        <div className="flex w-full flex-col gap-4">
+                            <ul className="flex list-none flex-col gap-4">
+                                {Links.map((nav) => {
+                                    const isActive = activePath === nav.url;
+
+                                    return (
+                                        <li key={nav.name}>
+                                            <Link
+                                                to={nav.url}
+                                                className={`text-[16px] font-medium capitalize ${isActive ? "text-primary-orange" : "text-black"
+                                                    }`}
+                                                onClick={() => setToggle(false)}
+                                            >
+                                                {nav.name}
+                                            </Link>
+                                        </li>
+                                    );
+                                })}
+                            </ul>
+
+                            {user ? (
+                                <div className="mt-2 flex flex-col gap-3 border-t pt-4">
+                                    <div className="text-sm font-medium text-gray-700">
+                                        {user.adminname}
+                                    </div>
+
+                                    <button
+                                        className="rounded bg-gray-100 px-4 py-2 text-left text-sm hover:bg-gray-200"
+                                        onClick={() => {
+                                            setToggle(false);
+                                            navigate("/messages");
+                                        }}
+                                    >
+                                        Messages
+                                    </button>
+
+                                    <button
+                                        className="rounded bg-gray-100 px-4 py-2 text-left text-sm hover:bg-gray-200"
+                                        onClick={() => {
+                                            setToggle(false);
+                                            navigate("/notifications");
+                                        }}
+                                    >
+                                        Notifications
+                                    </button>
+
+                                    <button
+                                        className="rounded bg-primary-orange px-4 py-2 text-left text-sm text-white hover:bg-secondary-orange"
+                                        onClick={handleLogout}
+                                    >
+                                        Logout
+                                    </button>
+                                </div>
+                            ) : (
+                                <button
+                                    className="mt-2 rounded bg-primary-orange px-4 py-2 text-white hover:bg-secondary-orange"
                                     onClick={() => {
-                                        setToggle(!toggle);
-                                        setActive(nav.name);
+                                        setToggle(false);
+                                        navigate("/login");
                                     }}
                                 >
-                                    <Link to={nav.name}>{nav.name}</Link>
-                                </li>
-                            ))}
-                        </ul>
+                                    Sign in
+                                </button>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>

@@ -36,14 +36,16 @@ import AdminUsersPage from '../pages/AdminUsersPage';
 const Index = () => {
     return (
         <div className="">
-            <Navbar
+            {/* <Navbar
                 SetShowLogin={function (): void {
                     throw new Error('Function not implemented.');
                 }}
                 SetShowAdsForm={function (): void {
                     throw new Error('Function not implemented.');
                 }}
-            />
+            /> */}
+
+            <Navbar />
             <div className="id" id="root">
                 <Routes>
                     <Route
