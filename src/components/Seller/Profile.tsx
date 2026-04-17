@@ -23,7 +23,7 @@ const Profile = () => {
     // }
 
     useEffect(() => {
-        dispatch(GettingUserById(id)).then((action) => {
+        dispatch(GettingUserById(id as string)).then((action) => {
             if (GettingUserById.fulfilled.match(action)) {
                 console.log(theSeller);
                 // dispatch(FetchSellerProducts(id));

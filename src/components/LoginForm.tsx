@@ -14,7 +14,7 @@ const LoginForm: React.FC = () => {
   const { isLoading } = useSelector((state: RootState) => state.auth);
 
   const [formData, setFormData] = useState({
-    username: "",
+    email: "",
     password: "",
   });
 
@@ -63,19 +63,19 @@ const LoginForm: React.FC = () => {
         >
           <div className="mb-4">
             <label
-              htmlFor="username"
+              htmlFor="email"
               className="block text-gray-700 text-sm font-bold mb-2"
             >
-              Username / Email:
+              Email:
             </label>
             <input
-              type="text"
-              id="username"
-              name="username"
-              value={formData.username}
+              type="email"
+              id="email"
+              name="email"
+              value={formData.email}
               onChange={handleChange}
               className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-primary-orange h-12"
-              placeholder="Enter your username or email"
+              placeholder="Enter your email address"
             />
           </div>
 

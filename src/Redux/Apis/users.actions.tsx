@@ -1,7 +1,7 @@
 import { axiosService } from "../helpers/axios";
 
 export interface LoginPayload {
-  username: string;
+  email: string;
   password: string;
 }
 

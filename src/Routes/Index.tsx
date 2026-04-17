@@ -22,6 +22,15 @@ import MainAdPage from '../pages/Main';
 import DashboardPage from '../pages/dashboardPage';
 import EditSubcategoryPage from '../pages/EditSubcategories';
 import EditCategoryPage from '../pages/EditCategoryPage';
+import MarketplaceDashboard from '../pages/MarketplaceDashboard';
+import VendorsPage from '../pages/VendorsPage';
+import AdminProductsPage from '../pages/AdminProductsPage';
+import AdminOrdersPage from '../pages/AdminOrdersPage';
+import AdminReviewsPage from '../pages/AdminReviewsPage';
+import AdminPackagesPage from '../pages/AdminPackagesPage';
+import AdminLocationsPage from '../pages/AdminLocationsPage';
+import AdminInvoicesPage from '../pages/AdminInvoicesPage';
+import AdminUsersPage from '../pages/AdminUsersPage';
 // import MainAd from '../components/MainAd';
 
 const Index = () => {
@@ -129,6 +138,15 @@ const Index = () => {
                         }
                     />
                     <Route path="/packages" element={<PrivateRoute>{<Packages />}</PrivateRoute>} />
+                    <Route path="/marketplace" element={<PrivateRoute><MarketplaceDashboard /></PrivateRoute>} />
+                    <Route path="/vendors" element={<PrivateRoute><VendorsPage /></PrivateRoute>} />
+                    <Route path="/admin-products" element={<PrivateRoute><AdminProductsPage /></PrivateRoute>} />
+                    <Route path="/orders" element={<PrivateRoute><AdminOrdersPage /></PrivateRoute>} />
+                    <Route path="/reviews" element={<PrivateRoute><AdminReviewsPage /></PrivateRoute>} />
+                    <Route path="/admin-packages" element={<PrivateRoute><AdminPackagesPage /></PrivateRoute>} />
+                    <Route path="/locations" element={<PrivateRoute><AdminLocationsPage /></PrivateRoute>} />
+                    <Route path="/invoices" element={<PrivateRoute><AdminInvoicesPage /></PrivateRoute>} />
+                    <Route path="/all-users" element={<PrivateRoute><AdminUsersPage /></PrivateRoute>} />
                     <Route
                         path="/new-subcategory"
                         element={
